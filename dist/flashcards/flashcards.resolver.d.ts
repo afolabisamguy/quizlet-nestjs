@@ -5,55 +5,55 @@ export declare class FlashcardsResolver {
     constructor(flashcardsService: FlashcardsService);
     createFlashCard(flashcardsInput: FlashCardInput): Promise<{
         flashcardSet: {
-            subject: string;
             id: string;
+            subject: string;
+            userId: string;
             createdAt: Date;
             updateAt: Date;
             numberOfCards: number;
-            userId: string;
         };
     } & {
-        id: string;
         question: string;
         answer: string;
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
     }>;
     viewFlashCard(flashcardsInput: FlashCardInput): Promise<{
         flashcard: {
-            id: string;
             question: string;
             answer: string;
+            id: string;
             createdAt: Date;
-            flashcardSetId: string;
             updateAt: Date;
+            flashcardSetId: string;
         };
     }>;
     viewAllFlashcardss(context: any): Promise<({
         flashcardSet: {
-            subject: string;
             id: string;
+            subject: string;
+            userId: string;
             createdAt: Date;
             updateAt: Date;
             numberOfCards: number;
-            userId: string;
         };
     } & {
-        id: string;
         question: string;
         answer: string;
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
     })[]>;
     updateFlashcards(flashcardsInput: FlashCardInput, context: any): Promise<import("@prisma/client").Prisma.BatchPayload>;
     deleteFlashcards(userId: string, flashcardsInput: FlashCardInput): Promise<{
-        id: string;
         question: string;
         answer: string;
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
     }>;
 }

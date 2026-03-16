@@ -5,55 +5,55 @@ export declare class FlashcardsService {
     constructor(prismaService: PrismaService);
     createFlashcard(flashcardsInput: FlashCardInput): Promise<{
         flashcardSet: {
-            subject: string;
             id: string;
+            subject: string;
+            userId: string;
             createdAt: Date;
             updateAt: Date;
             numberOfCards: number;
-            userId: string;
         };
     } & {
-        id: string;
         question: string;
         answer: string;
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
     }>;
     viewFlashcard(flashcardSetsId: string, flashCardId: string): Promise<{
         flashcard: {
-            id: string;
             question: string;
             answer: string;
+            id: string;
             createdAt: Date;
-            flashcardSetId: string;
             updateAt: Date;
+            flashcardSetId: string;
         };
     }>;
     viewAllFlashcards(flashCardSetId: string): Promise<({
         flashcardSet: {
-            subject: string;
             id: string;
+            subject: string;
+            userId: string;
             createdAt: Date;
             updateAt: Date;
             numberOfCards: number;
-            userId: string;
         };
     } & {
-        id: string;
         question: string;
         answer: string;
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
     })[]>;
     updateFlashcards(flashcardsInput: FlashCardInput, flashcardSetId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     deleteFlashcards(flashcardInput: FlashCardInput, flashcardId: string): Promise<{
-        id: string;
         question: string;
         answer: string;
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
     }>;
 }

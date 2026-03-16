@@ -15,21 +15,21 @@ export declare class FlashcardSetsService {
             lobbyIds: string[];
         };
     } & {
-        subject: string;
         id: string;
+        subject: string;
+        numberOfCards: number;
         createdAt: Date;
         updateAt: Date;
-        numberOfCards: number;
         userId: string;
     }>;
     viewFlashcardSet(subject: string, userId: string): Promise<{
         userId: string;
         flashcardSet: {
-            subject: string;
             id: string;
+            subject: string;
+            numberOfCards: number;
             createdAt: Date;
             updateAt: Date;
-            numberOfCards: number;
             userId: string;
         };
     }>;
@@ -45,20 +45,20 @@ export declare class FlashcardSetsService {
             lobbyIds: string[];
         };
     } & {
-        subject: string;
         id: string;
+        subject: string;
+        numberOfCards: number;
         createdAt: Date;
         updateAt: Date;
-        numberOfCards: number;
         userId: string;
     })[]>;
     updateFlashcardSets(flashcardSetsInput: FlashCardSetsInput, userId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
     deleteFlashcardSets(subject: string, userId: string): Promise<{
-        subject: string;
         id: string;
+        subject: string;
+        numberOfCards: number;
         createdAt: Date;
         updateAt: Date;
-        numberOfCards: number;
         userId: string;
     }>;
 }

@@ -28,9 +28,9 @@ export class FlashcardSetsResolver {
   @Query(() => FlashCardSets, { name: 'flashCardSet' })
   viewFlashCardSet(
     @Args('viewFlashCardSets')
+    flashcardSetsInput: FlashCardSetsInput,
     @Context()
     context,
-    flashcardSetsInput: FlashCardSetsInput,
   ) {
     const userId = context.req.user.Id;
     return this.flashcardSetsService.viewFlashcardSet(

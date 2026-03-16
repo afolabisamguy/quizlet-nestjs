@@ -6,6 +6,7 @@ import { LobbyModule } from './lobby/lobby.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { AppResolver } from './app.resolver';
 
 @Module({
   imports: [
@@ -26,6 +27,6 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
     FlashcardModule,
     LobbyModule,
   ],
-  providers: [AppService],
+  providers: [AppService, AppResolver],
 })
 export class AppModule {}

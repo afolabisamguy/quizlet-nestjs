@@ -6,7 +6,7 @@ export class Flashcards {
   @Field({ description: 'The id of the flashcard' })
   id: string;
 
-  @Field({ description: 'The set the flashcard is in' })
+  @Field(() => FlashCardSets, { description: 'The set the flashcard is in' })
   flashcardSet: FlashCardSets;
 
   @Field({ description: 'The question of the flashcard.' })

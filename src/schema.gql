@@ -1,0 +1,88 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  """Id of the user"""
+  id: String!
+
+  """The full name of the user"""
+  fullname: String!
+
+  """The password of the user"""
+  password: String!
+
+  """The email of the user"""
+  email: String!
+  flashcardSets: [FlashCardSets!]!
+}
+
+type Flashcards {
+  """The id of the flashcard"""
+  id: String!
+
+  """The set the flashcard is in"""
+  flashcardSet: FlashCardSets!
+
+  """The question of the flashcard."""
+  question: String!
+
+  """The answer of the flashcard."""
+  answer: String!
+}
+
+type Lobby {
+  id: String!
+  participatingPlayers: [User!]!
+  flashcardSets: FlashCardSets!
+  lobbyStatus: String!
+  lobbyCode: String!
+}
+
+type FlashCardSets {
+  """The id of the flashcard set"""
+  id: String!
+
+  """The flashcard set's creator"""
+  user: User!
+
+  """The subject for the flashcard set."""
+  subject: String!
+
+  """The flashcards in the flashcard set"""
+  flashcards: Flashcards!
+
+  """The number of flashcards in the flashcard set"""
+  numberOfCards: Int!
+
+  """The lobby that the flashcard set is being used in"""
+  lobby: Lobby!
+}
+
+type Query {
+  getHello: String!
+  flashCardSet(viewFlashCardSets: FlashCardSetsInput!): FlashCardSets!
+  flashcardsets: [FlashCardSets!]!
+  flashCard(viewFlashCards: FlashCardInput!): Flashcards!
+  flashcards: [Flashcards!]!
+}
+
+input FlashCardSetsInput {
+  subject: String!
+}
+
+input FlashCardInput {
+  question: String!
+  answer: String!
+  flashCardSetId: String!
+  flashCardId: String!
+}
+
+type Mutation {
+  createFlashCardSet(createFlashCardSet: FlashCardSetsInput!): FlashCardSets!
+  updateFlashcardSets(updateFlashcardSets: FlashCardSetsInput!): FlashCardSets!
+  deleteFlashcardSets(deleteFlashcardSets: String!): FlashCardSets!
+  createFlashCard(createFlashCard: FlashCardInput!): Flashcards!
+  updateFlashcards(updateFlashcards: FlashCardInput!): Flashcards!
+  deleteFlashcards(deleteFlashcards: String!): Flashcards!
+}
