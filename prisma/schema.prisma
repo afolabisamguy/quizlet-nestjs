@@ -105,6 +105,13 @@ id              String        @id @default(auto()) @map("_id") @db.ObjectId
   correctAnswers           Int              @default(0)
   incorrectAnswers           Int              @default(0)
   rank           Int              @default(1)
+
+  @@unique([leaderboardId, playerId])
+  @@index([lobbyId, rank])
+  @@index([playerId])
 }
+
+
+
 
 // big work to be done
