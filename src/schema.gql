@@ -1,0 +1,200 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type Flashcards {
+  """The id of the flashcard"""
+  id: String!
+
+  """The flashcard set id"""
+  flashcardSetId: String!
+
+  """The set the flashcard is in"""
+  flashcardSet: FlashCardSets
+
+  """The question of the flashcard."""
+  question: String!
+
+  """The answer of the flashcard."""
+  answer: String!
+  createdAt: DateTime
+  updateAt: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type FlashCardSets {
+  """The id of the flashcard set"""
+  id: String!
+
+  """The user id of the flashcard set creator"""
+  userId: String!
+
+  """The subject for the flashcard set."""
+  subject: String!
+
+  """The total number of cards in the flashcard set"""
+  numberOfCards: Int!
+
+  """The flashcards in the flashcard set"""
+  flashcards: [Flashcards!]
+  createdAt: DateTime
+}
+
+type LobbyPlayer {
+  id: String!
+  username: String!
+  fullname: String!
+}
+
+type LeaderboardEntry {
+  id: String!
+  lobbyId: String!
+  player: LobbyPlayer!
+  rank: Int!
+  score: Int!
+  correctAnswers: Int!
+  incorrectAnswers: Int!
+  streak: Int!
+  updatedAt: DateTime!
+}
+
+type Leaderboard {
+  id: String!
+  lobbyId: String!
+  lobbyCode: String!
+  lobbyStatus: String!
+  entries: [LeaderboardEntry!]!
+  updatedAt: DateTime!
+}
+
+type Lobby {
+  id: String!
+  lobbyCode: String!
+  lobbyStatus: String!
+  flashCardSetId: String!
+  createdBy: LobbyPlayer!
+  participatingPlayers: [LobbyPlayer!]!
+  leaderboard: Leaderboard!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AnsweredQuestion {
+  lobbyCode: String!
+  lobbyStatus: String!
+  flashcardId: String!
+  question: String!
+  answer: String!
+  isCorrect: Boolean!
+  scoreDelta: Int!
+  standing: LeaderboardEntry!
+  leaderboard: Leaderboard!
+  answeredAt: DateTime!
+}
+
+type User {
+  """Id of the user"""
+  id: String!
+
+  """The full name of the user"""
+  fullname: String!
+
+  """The username of the user"""
+  username: String!
+
+  """The email of the user"""
+  email: String!
+  flashcardSets: [FlashCardSets!]
+  createdAt: DateTime
+  updatedAt: DateTime
+}
+
+type SignUpResponse {
+  token: String!
+  user: User!
+}
+
+type LoginResponse {
+  token: String!
+  user: User!
+}
+
+type Query {
+  hello: String!
+  flashCardSet(viewFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
+  flashcardsets: [FlashCardSets!]!
+  flashCard(viewFlashCardInput: FlashCardInput!): Flashcards!
+  flashcards(flashCardSetId: String!): [Flashcards!]!
+  lobby(lobbyCode: String!): Lobby!
+  leaderboard(lobbyCode: String!): Leaderboard!
+}
+
+input FlashCardSetsInput {
+  subject: String!
+}
+
+input FlashCardInput {
+  question: String
+  answer: String
+  flashCardSetId: String!
+  flashCardId: String
+}
+
+type Mutation {
+  signUp(signUpInput: SignUpInput!): SignUpResponse!
+  login(loginInput: LoginInput!): LoginResponse!
+  createFlashCardSet(createFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
+  updateFlashcardSets(updateFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
+  deleteFlashcardSets(deleteFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
+  createFlashCard(createFlashCardInput: FlashCardInput!): Flashcards!
+  updateFlashcards(updateFlashCardInput: FlashCardInput!): Flashcards!
+  deleteFlashcards(deleteFlashCardInput: FlashCardInput!): Flashcards!
+  createLobby(createLobbyInput: CreateLobbyInput!): Lobby!
+  joinLobby(joinLobbyInput: JoinLobbyInput!): Lobby!
+  startLobby(lobbyCode: String!): Lobby!
+  updateLeaderboard(updateLeaderboardInput: UpdateLeaderboardInput!): Leaderboard!
+  submitAnswer(submitAnswerInput: SubmitAnswerInput!): AnsweredQuestion!
+}
+
+input SignUpInput {
+  fullname: String!
+  email: String!
+  password: String!
+  username: String!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input CreateLobbyInput {
+  flashCardSetId: String!
+  lobbyCode: String
+}
+
+input JoinLobbyInput {
+  lobbyCode: String!
+}
+
+input UpdateLeaderboardInput {
+  lobbyCode: String!
+  score: Int!
+  correctAnswers: Int
+  incorrectAnswers: Int
+  streak: Int
+}
+
+input SubmitAnswerInput {
+  lobbyCode: String!
+  isCorrect: Boolean!
+  scoreDelta: Int!
+}
+
+type Subscription {
+  leaderboardUpdated(lobbyCode: String!): Leaderboard!
+}

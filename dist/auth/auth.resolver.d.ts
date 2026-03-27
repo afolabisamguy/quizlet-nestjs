@@ -7,9 +7,9 @@ export declare class AuthResolver {
     signUp(signUpInput: SignUpInput): Promise<{
         user: {
             id: string;
+            email: string;
             fullname: string;
             password: string;
-            email: string;
             username: string;
             createdAt: Date;
             updatedAt: Date;
@@ -21,9 +21,9 @@ export declare class AuthResolver {
         token: string;
         user: {
             id: string;
+            email: string;
             fullname: string;
             password: string;
-            email: string;
             username: string;
             createdAt: Date;
             updatedAt: Date;

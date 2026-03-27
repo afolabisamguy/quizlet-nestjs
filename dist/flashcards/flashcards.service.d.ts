@@ -14,21 +14,28 @@ export declare class FlashcardsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updateAt: Date;
+        flashcardSetId: string;
         question: string;
         answer: string;
-        createdAt: Date;
-        flashcardSetId: string;
-        updateAt: Date;
     }>;
     viewFlashcard(flashcardSetsId: string, flashCardId: string): Promise<{
-        flashcard: {
+        flashcardSet: {
+            subject: string;
             id: string;
-            question: string;
-            answer: string;
             createdAt: Date;
-            flashcardSetId: string;
             updateAt: Date;
+            numberOfCards: number;
+            userId: string;
         };
+    } & {
+        id: string;
+        createdAt: Date;
+        updateAt: Date;
+        flashcardSetId: string;
+        question: string;
+        answer: string;
     }>;
     viewAllFlashcards(flashCardSetId: string): Promise<({
         flashcardSet: {
@@ -41,19 +48,44 @@ export declare class FlashcardsService {
         };
     } & {
         id: string;
+        createdAt: Date;
+        updateAt: Date;
+        flashcardSetId: string;
         question: string;
         answer: string;
-        createdAt: Date;
-        flashcardSetId: string;
-        updateAt: Date;
     })[]>;
-    updateFlashcards(flashcardsInput: FlashCardInput, flashcardSetId: string): Promise<import("@prisma/client").Prisma.BatchPayload>;
-    deleteFlashcards(flashcardInput: FlashCardInput, flashcardId: string): Promise<{
+    updateFlashcards(flashcardsInput: FlashCardInput, flashcardId: string): Promise<{
+        flashcardSet: {
+            subject: string;
+            id: string;
+            createdAt: Date;
+            updateAt: Date;
+            numberOfCards: number;
+            userId: string;
+        };
+    } & {
         id: string;
+        createdAt: Date;
+        updateAt: Date;
+        flashcardSetId: string;
         question: string;
         answer: string;
+    }>;
+    deleteFlashcards(flashcardInput: FlashCardInput, flashcardId: string): Promise<{
+        flashcardSet: {
+            subject: string;
+            id: string;
+            createdAt: Date;
+            updateAt: Date;
+            numberOfCards: number;
+            userId: string;
+        };
+    } & {
+        id: string;
         createdAt: Date;
-        flashcardSetId: string;
         updateAt: Date;
+        flashcardSetId: string;
+        question: string;
+        answer: string;
     }>;
 }

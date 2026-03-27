@@ -1,21 +1,24 @@
 import { Field, InputType } from '@nestjs/graphql';
+
 import { IsOptional, IsString } from 'class-validator';
 
-InputType();
+@InputType()
 export class FlashCardInput {
-  @Field()
+  @Field({ nullable: true })
   @IsString()
+  @IsOptional()
   question: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
+  @IsOptional()
   answer: string;
 
   @Field()
   @IsString()
   flashCardSetId: string;
 
-  @Field()
+  @Field({ nullable: true })
   @IsString()
   @IsOptional()
   flashCardId?: string;

@@ -1,8 +1,9 @@
-import { User } from 'src/auth/entities/auth.entity';
 import { Flashcards } from 'src/flashcards/entities/flashcards.entities';
 export declare class FlashCardSets {
     id: string;
-    user: User;
+    userId: string;
     subject: string;
-    flashcards: Flashcards;
+    numberOfCards: number;
+    flashcards?: Flashcards[];
+    createdAt?: Date;
 }

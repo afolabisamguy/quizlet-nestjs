@@ -1,4 +1,5 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
+
 import { FlashCardSets } from 'src/flashcard-sets/entities/flashcard-sets.entity';
 
 @ObjectType()
@@ -12,15 +13,21 @@ export class User {
   fullname: string;
 
   @Field(() => String, {
-    description: 'The password of the user',
+    description: 'The username of the user',
   })
-  password: string;
+  username: string;
 
   @Field(() => String, {
     description: 'The email of the user',
   })
   email: string;
 
-  @Field(() => [FlashCardSets])
+  @Field(() => [FlashCardSets], { nullable: true })
   flashcardSets: FlashCardSets[];
+
+  @Field(() => Date, { nullable: true })
+  createdAt?: Date;
+
+  @Field(() => Date, { nullable: true })
+  updatedAt?: Date;
 }

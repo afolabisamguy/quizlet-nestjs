@@ -54,6 +54,7 @@ model User {
   // many-to-many via id list
   lobbyIds        String[]         @db.ObjectId
   lobbiesPlaying  Lobby[]          @relation("participants", fields: [lobbyIds], references: [id])
+  leaderboardEntries LeaderboardEntry[]
 }
 
 model Lobby {
@@ -68,18 +69,41 @@ model Lobby {
   flashCardSetId        String        @db.ObjectId
 
   leaderboard           Leaderboard?   
+  leaderboardEntries    LeaderboardEntry[]
 
   // many-to-many via id list
   participantIds        String[]      @db.ObjectId
   participatingPlayers  User[]        @relation("participants", fields: [participantIds], references: [id])
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
 }
 
 model Leaderboard {
   id              String        @id @default(auto()) @map("_id") @db.ObjectId
   lobby           Lobby         @relation(fields: [lobbyId], references: [id])
   lobbyId         String        @db.ObjectId  @unique
-  
-
+  entries         LeaderboardEntry[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
-// big work to be done
+model LeaderboardEntry {
+  id                String        @id @default(auto()) @map("_id") @db.ObjectId
+  leaderboard       Leaderboard   @relation(fields: [leaderboardId], references: [id])
+  leaderboardId     String        @db.ObjectId
+  lobby             Lobby         @relation(fields: [lobbyId], references: [id])
+  lobbyId           String        @db.ObjectId
+  player            User          @relation(fields: [playerId], references: [id])
+  playerId          String        @db.ObjectId
+  score             Int           @default(0)
+  correctAnswers    Int           @default(0)
+  incorrectAnswers  Int           @default(0)
+  streak            Int           @default(0)
+  rank              Int           @default(1)
+  joinedAt          DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@unique([leaderboardId, playerId])
+  @@index([lobbyId, rank])
+  @@index([playerId])
+}

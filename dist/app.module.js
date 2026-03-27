@@ -15,6 +15,8 @@ const lobby_module_1 = require("./lobby/lobby.module");
 const graphql_1 = require("@nestjs/graphql");
 const default_1 = require("@apollo/server/plugin/landingPage/default");
 const apollo_1 = require("@nestjs/apollo");
+const app_resolver_1 = require("./app.resolver");
+const auth_module_1 = require("./auth/auth.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -34,11 +36,12 @@ exports.AppModule = AppModule = __decorate([
                 ],
                 playground: false,
             }),
+            auth_module_1.AuthModule,
             flashcard_sets_module_1.FlashcardSetsModule,
             flashcards_module_1.FlashcardModule,
             lobby_module_1.LobbyModule,
         ],
-        providers: [app_service_1.AppService],
+        providers: [app_service_1.AppService, app_resolver_1.AppResolver],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

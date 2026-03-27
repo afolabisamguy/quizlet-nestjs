@@ -1,0 +1,88 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.FlashcardsResolver = void 0;
+const graphql_1 = require("@nestjs/graphql");
+const flashcards_service_1 = require("./flashcards.service");
+const common_1 = require("@nestjs/common");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const flashcard_input_1 = require("./dto/flashcard.input");
+const flashcards_entities_1 = require("./entities/flashcards.entities");
+let FlashcardsResolver = class FlashcardsResolver {
+    flashcardsService;
+    constructor(flashcardsService) {
+        this.flashcardsService = flashcardsService;
+    }
+    createFlashCard(flashcardsInput) {
+        return this.flashcardsService.createFlashcard(flashcardsInput);
+    }
+    viewFlashCard(flashcardsInput) {
+        return this.flashcardsService.viewFlashcard(flashcardsInput.flashCardSetId, flashcardsInput.flashCardId);
+    }
+    viewAllFlashcards(flashCardSetId) {
+        return this.flashcardsService.viewAllFlashcards(flashCardSetId);
+    }
+    updateFlashcards(flashcardsInput) {
+        return this.flashcardsService.updateFlashcards(flashcardsInput, flashcardsInput.flashCardId);
+    }
+    deleteFlashcards(flashcardsInput) {
+        return this.flashcardsService.deleteFlashcards(flashcardsInput, flashcardsInput.flashCardId);
+    }
+};
+exports.FlashcardsResolver = FlashcardsResolver;
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, graphql_1.Mutation)(() => flashcards_entities_1.Flashcards),
+    __param(0, (0, graphql_1.Args)('createFlashCardInput')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [flashcard_input_1.FlashCardInput]),
+    __metadata("design:returntype", void 0)
+], FlashcardsResolver.prototype, "createFlashCard", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, graphql_1.Query)(() => flashcards_entities_1.Flashcards, { name: 'flashCard' }),
+    __param(0, (0, graphql_1.Args)('viewFlashCardInput')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [flashcard_input_1.FlashCardInput]),
+    __metadata("design:returntype", void 0)
+], FlashcardsResolver.prototype, "viewFlashCard", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, graphql_1.Query)(() => [flashcards_entities_1.Flashcards], { name: 'flashcards' }),
+    __param(0, (0, graphql_1.Args)('flashCardSetId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], FlashcardsResolver.prototype, "viewAllFlashcards", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, graphql_1.Mutation)(() => flashcards_entities_1.Flashcards),
+    __param(0, (0, graphql_1.Args)('updateFlashCardInput')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [flashcard_input_1.FlashCardInput]),
+    __metadata("design:returntype", void 0)
+], FlashcardsResolver.prototype, "updateFlashcards", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, graphql_1.Mutation)(() => flashcards_entities_1.Flashcards),
+    __param(0, (0, graphql_1.Args)('deleteFlashCardInput')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [flashcard_input_1.FlashCardInput]),
+    __metadata("design:returntype", void 0)
+], FlashcardsResolver.prototype, "deleteFlashcards", null);
+exports.FlashcardsResolver = FlashcardsResolver = __decorate([
+    (0, graphql_1.Resolver)(),
+    __metadata("design:paramtypes", [flashcards_service_1.FlashcardsService])
+], FlashcardsResolver);
+//# sourceMappingURL=flashcards.resolver.js.map

@@ -8,9 +8,9 @@ export declare class AuthService {
     signUp(signUpInput: SignUpInput): Promise<{
         user: {
             id: string;
+            email: string;
             fullname: string;
             password: string;
-            email: string;
             username: string;
             createdAt: Date;
             updatedAt: Date;
@@ -22,9 +22,9 @@ export declare class AuthService {
         token: string;
         user: {
             id: string;
+            email: string;
             fullname: string;
             password: string;
-            email: string;
             username: string;
             createdAt: Date;
             updatedAt: Date;

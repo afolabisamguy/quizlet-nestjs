@@ -4,11 +4,19 @@ export declare class FlashcardSetsResolver {
     private readonly flashcardSetsService;
     constructor(flashcardSetsService: FlashcardSetsService);
     createFlashCardSet(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<{
+        flashcards: {
+            id: string;
+            createdAt: Date;
+            updateAt: Date;
+            flashcardSetId: string;
+            question: string;
+            answer: string;
+        }[];
         user: {
             id: string;
+            email: string;
             fullname: string;
             password: string;
-            email: string;
             username: string;
             createdAt: Date;
             updatedAt: Date;
@@ -22,23 +30,47 @@ export declare class FlashcardSetsResolver {
         numberOfCards: number;
         userId: string;
     }>;
-    viewFlashCardSet(context: any, flashcardSetsInput: FlashCardSetsInput): Promise<{
-        userId: string;
-        flashcardSet: {
-            subject: string;
+    viewFlashCardSet(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<{
+        flashcards: {
             id: string;
             createdAt: Date;
             updateAt: Date;
-            numberOfCards: number;
-            userId: string;
-        };
-    }>;
-    viewAllFlashcardSetss(context: any): Promise<({
+            flashcardSetId: string;
+            question: string;
+            answer: string;
+        }[];
         user: {
             id: string;
+            email: string;
             fullname: string;
             password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
+    } & {
+        subject: string;
+        id: string;
+        createdAt: Date;
+        updateAt: Date;
+        numberOfCards: number;
+        userId: string;
+    }>;
+    viewAllFlashcardSetss(context: any): Promise<({
+        flashcards: {
+            id: string;
+            createdAt: Date;
+            updateAt: Date;
+            flashcardSetId: string;
+            question: string;
+            answer: string;
+        }[];
+        user: {
+            id: string;
             email: string;
+            fullname: string;
+            password: string;
             username: string;
             createdAt: Date;
             updatedAt: Date;
@@ -52,8 +84,53 @@ export declare class FlashcardSetsResolver {
         numberOfCards: number;
         userId: string;
     })[]>;
-    updateFlashcardSets(flashcardsetsInput: FlashCardSetsInput, context: any): Promise<import("@prisma/client").Prisma.BatchPayload>;
-    deleteFlashcardSets(userId: string, flashcardSetsInput: FlashCardSetsInput): Promise<{
+    updateFlashcardSets(flashcardsetsInput: FlashCardSetsInput, context: any): Promise<{
+        flashcards: {
+            id: string;
+            createdAt: Date;
+            updateAt: Date;
+            flashcardSetId: string;
+            question: string;
+            answer: string;
+        }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
+    } & {
+        subject: string;
+        id: string;
+        createdAt: Date;
+        updateAt: Date;
+        numberOfCards: number;
+        userId: string;
+    }>;
+    deleteFlashcardSets(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<{
+        flashcards: {
+            id: string;
+            createdAt: Date;
+            updateAt: Date;
+            flashcardSetId: string;
+            question: string;
+            answer: string;
+        }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
+    } & {
         subject: string;
         id: string;
         createdAt: Date;
