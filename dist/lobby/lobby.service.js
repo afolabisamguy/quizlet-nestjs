@@ -13,6 +13,7 @@ exports.LobbyService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const lobby_pubsub_1 = require("./lobby.pubsub");
+const lobby_code_util_1 = require("./lobby-code.util");
 let LobbyService = class LobbyService {
     prisma;
     constructor(prisma) {
@@ -21,7 +22,10 @@ let LobbyService = class LobbyService {
     async createLobby(createLobbyInput, userId) {
         await this.ensureUserExists(userId);
         await this.ensureFlashcardSetExists(createLobbyInput.flashCardSetId);
-        const lobbyCode = await this.resolveLobbyCode(createLobbyInput.lobbyCode);
+        const existingLobbyCodes = new Set((await this.prisma.lobby.findMany({
+            select: { lobbyCode: true },
+        })).map((lobby) => lobby.lobbyCode));
+        const lobbyCode = await (0, lobby_code_util_1.generateLobbyCode)(existingLobbyCodes);
         const lobby = await this.prisma.$transaction(async (tx) => {
             const createdLobby = await tx.lobby.create({
                 data: {

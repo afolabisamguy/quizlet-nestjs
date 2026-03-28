@@ -14,6 +14,7 @@ import { UpdateLeaderboardInput } from './dto/update-leaderboard.input';
 import { SubmitAnswerInput } from './dto/submit-answer.input';
 
 import { lobbyPubSub } from './lobby.pubsub';
+import { generateLobbyCode } from './lobby-code.util';
 
 type PrismaLobbyClient = any;
 
@@ -26,7 +27,16 @@ export class LobbyService {
 
     await this.ensureFlashcardSetExists(createLobbyInput.flashCardSetId);
 
-    const lobbyCode = await this.resolveLobbyCode(createLobbyInput.lobbyCode);
+    // get all the lobbycodes in a set
+    const existingLobbyCodes = new Set(
+      (
+        await this.prisma.lobby.findMany({
+          select: { lobbyCode: true },
+        })
+      ).map((lobby) => lobby.lobbyCode),
+    );
+
+    const lobbyCode = await generateLobbyCode(existingLobbyCodes);
 
     const lobby = await this.prisma.$transaction(async (tx) => {
       const createdLobby = await tx.lobby.create({

@@ -7,10 +7,4 @@ export class CreateLobbyInput {
   @Field()
   @IsMongoId()
   flashCardSetId: string;
-
-  @Field({ nullable: true })
-  @IsOptional()
-  @IsString()
-  @Length(4, 12)
-  lobbyCode?: string;
 }

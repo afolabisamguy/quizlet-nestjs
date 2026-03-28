@@ -14,7 +14,6 @@ const graphql_1 = require("@nestjs/graphql");
 const class_validator_1 = require("class-validator");
 let CreateLobbyInput = class CreateLobbyInput {
     flashCardSetId;
-    lobbyCode;
 };
 exports.CreateLobbyInput = CreateLobbyInput;
 __decorate([
@@ -22,13 +21,6 @@ __decorate([
     (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
 ], CreateLobbyInput.prototype, "flashCardSetId", void 0);
-__decorate([
-    (0, graphql_1.Field)({ nullable: true }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(4, 12),
-    __metadata("design:type", String)
-], CreateLobbyInput.prototype, "lobbyCode", void 0);
 exports.CreateLobbyInput = CreateLobbyInput = __decorate([
     (0, graphql_1.InputType)()
 ], CreateLobbyInput);

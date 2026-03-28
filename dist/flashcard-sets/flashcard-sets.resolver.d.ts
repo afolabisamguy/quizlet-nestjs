@@ -4,162 +4,162 @@ export declare class FlashcardSetsResolver {
     private readonly flashcardSetsService;
     constructor(flashcardSetsService: FlashcardSetsService);
     createFlashCardSet(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<{
-        user: {
-            id: string;
-            createdAt: Date;
-            fullname: string;
-            password: string;
-            username: string;
-            email: string;
-            updatedAt: Date;
-            lobbyIds: string[];
-        };
         flashcards: {
+            question: string;
+            answer: string;
             id: string;
             createdAt: Date;
             updateAt: Date;
-            question: string;
-            answer: string;
             flashcardSetId: string;
         }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
     } & {
-        id: string;
         subject: string;
+        id: string;
         createdAt: Date;
         updateAt: Date;
         numberOfCards: number;
         userId: string;
     }>;
     createFlashCardSetWithFlashcards(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<({
-        user: {
-            id: string;
-            createdAt: Date;
-            fullname: string;
-            password: string;
-            username: string;
-            email: string;
-            updatedAt: Date;
-            lobbyIds: string[];
-        };
         flashcards: {
+            question: string;
+            answer: string;
             id: string;
             createdAt: Date;
             updateAt: Date;
-            question: string;
-            answer: string;
             flashcardSetId: string;
         }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
     } & {
-        id: string;
         subject: string;
+        id: string;
         createdAt: Date;
         updateAt: Date;
         numberOfCards: number;
         userId: string;
     }) | null>;
     viewFlashCardSet(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<{
-        user: {
-            id: string;
-            createdAt: Date;
-            fullname: string;
-            password: string;
-            username: string;
-            email: string;
-            updatedAt: Date;
-            lobbyIds: string[];
-        };
         flashcards: {
+            question: string;
+            answer: string;
             id: string;
             createdAt: Date;
             updateAt: Date;
-            question: string;
-            answer: string;
             flashcardSetId: string;
         }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
     } & {
-        id: string;
         subject: string;
+        id: string;
         createdAt: Date;
         updateAt: Date;
         numberOfCards: number;
         userId: string;
     }>;
     viewAllFlashcardSetss(context: any): Promise<({
-        user: {
-            id: string;
-            createdAt: Date;
-            fullname: string;
-            password: string;
-            username: string;
-            email: string;
-            updatedAt: Date;
-            lobbyIds: string[];
-        };
         flashcards: {
+            question: string;
+            answer: string;
             id: string;
             createdAt: Date;
             updateAt: Date;
-            question: string;
-            answer: string;
             flashcardSetId: string;
         }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
     } & {
-        id: string;
         subject: string;
+        id: string;
         createdAt: Date;
         updateAt: Date;
         numberOfCards: number;
         userId: string;
     })[]>;
     updateFlashcardSets(flashcardsetsInput: FlashCardSetsInput, context: any): Promise<{
-        user: {
-            id: string;
-            createdAt: Date;
-            fullname: string;
-            password: string;
-            username: string;
-            email: string;
-            updatedAt: Date;
-            lobbyIds: string[];
-        };
         flashcards: {
+            question: string;
+            answer: string;
             id: string;
             createdAt: Date;
             updateAt: Date;
-            question: string;
-            answer: string;
             flashcardSetId: string;
         }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
     } & {
-        id: string;
         subject: string;
+        id: string;
         createdAt: Date;
         updateAt: Date;
         numberOfCards: number;
         userId: string;
     }>;
     deleteFlashcardSets(flashcardSetsInput: FlashCardSetsInput, context: any): Promise<{
-        user: {
-            id: string;
-            createdAt: Date;
-            fullname: string;
-            password: string;
-            username: string;
-            email: string;
-            updatedAt: Date;
-            lobbyIds: string[];
-        };
         flashcards: {
+            question: string;
+            answer: string;
             id: string;
             createdAt: Date;
             updateAt: Date;
-            question: string;
-            answer: string;
             flashcardSetId: string;
         }[];
+        user: {
+            id: string;
+            email: string;
+            fullname: string;
+            password: string;
+            username: string;
+            createdAt: Date;
+            updatedAt: Date;
+            lobbyIds: string[];
+        };
     } & {
-        id: string;
         subject: string;
+        id: string;
         createdAt: Date;
         updateAt: Date;
         numberOfCards: number;

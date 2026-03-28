@@ -187,7 +187,6 @@ input CreateFlashcardsInput {
 
 input CreateLobbyInput {
   flashCardSetId: String!
-  lobbyCode: String
 }
 
 input JoinLobbyInput {
