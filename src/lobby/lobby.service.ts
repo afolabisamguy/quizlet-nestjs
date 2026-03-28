@@ -558,6 +558,19 @@ export class LobbyService {
             fullname: true,
           },
         },
+        flashCardSet: {
+          select: {
+            id: true,
+            subject: true,
+            numberOfCards: true,
+            flashcards: {
+              select: {
+                question: true,
+                answer: true,
+              },
+            },
+          },
+        },
 
         leaderboard: {
           include: {

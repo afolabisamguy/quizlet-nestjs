@@ -75,7 +75,7 @@ type Lobby {
   id: String!
   lobbyCode: String!
   lobbyStatus: String!
-  flashCardSetId: String!
+  flashCardSet: FlashCardSets!
   createdBy: LobbyPlayer!
   participatingPlayers: [LobbyPlayer!]!
   leaderboard: Leaderboard!

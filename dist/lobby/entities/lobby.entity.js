@@ -13,11 +13,12 @@ exports.Lobby = void 0;
 const graphql_1 = require("@nestjs/graphql");
 const leaderboard_entity_1 = require("./leaderboard.entity");
 const lobby_player_entity_1 = require("./lobby-player.entity");
+const flashcard_sets_entity_1 = require("../../flashcard-sets/entities/flashcard-sets.entity");
 let Lobby = class Lobby {
     id;
     lobbyCode;
     lobbyStatus;
-    flashCardSetId;
+    flashCardSet;
     createdBy;
     participatingPlayers;
     leaderboard;
@@ -39,8 +40,8 @@ __decorate([
 ], Lobby.prototype, "lobbyStatus", void 0);
 __decorate([
     (0, graphql_1.Field)(),
-    __metadata("design:type", String)
-], Lobby.prototype, "flashCardSetId", void 0);
+    __metadata("design:type", flashcard_sets_entity_1.FlashCardSets)
+], Lobby.prototype, "flashCardSet", void 0);
 __decorate([
     (0, graphql_1.Field)(() => lobby_player_entity_1.LobbyPlayer),
     __metadata("design:type", lobby_player_entity_1.LobbyPlayer)

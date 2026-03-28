@@ -19,11 +19,11 @@ export declare class LobbyResolver {
         id: string;
         lobbyCode: string;
         lobbyStatus: string;
+        createdAt: Date;
+        updatedAt: Date;
         creatorUserId: string;
         flashCardSetId: string;
         participantIds: string[];
-        createdAt: Date;
-        updatedAt: Date;
     }>;
     updateLeaderboard(updateLeaderboardInput: UpdateLeaderboardInput, context: any): Promise<any>;
     submitAnswer(submitAnswerInput: SubmitAnswerInput, context: any): Promise<{
