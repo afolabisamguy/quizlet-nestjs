@@ -3,52 +3,61 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { FlashCardInput } from './dto/flashcard.input';
+import { CreateFlashcardsInput } from './dto/create-flashcards.input';
+import { FlashcardItemInput } from './dto/flashcard-item.input';
 
 @Injectable()
 export class FlashcardsService {
   constructor(private prismaService: PrismaService) {}
 
   async createFlashcard(flashcardsInput: FlashCardInput) {
-    const flashExists = await this.prismaService.flashcardSets.findUnique({
-      where: {
-        id: flashcardsInput.flashCardSetId,
-      },
-    });
-
-    if (!flashExists) {
-      throw new NotFoundException('Flashcard set not found');
-    }
-
     if (!flashcardsInput.question || !flashcardsInput.answer) {
       throw new NotFoundException('Question and answer are required');
     }
 
-    const flashcards = await this.prismaService.$transaction(async (tx) => {
-      const createdFlashcard = await tx.flashcards.create({
-        data: {
-          answer: flashcardsInput.answer,
-
+    const [flashcard] = await this.createFlashcards({
+      flashCardSetId: flashcardsInput.flashCardSetId,
+      flashcards: [
+        {
           question: flashcardsInput.question,
-
-          flashcardSetId: flashcardsInput.flashCardSetId,
+          answer: flashcardsInput.answer,
         },
+      ],
+    });
 
-        include: { flashcardSet: true },
-      });
+    return flashcard;
+  }
+
+  async createFlashcards(createFlashcardsInput: CreateFlashcardsInput) {
+    await this.ensureFlashcardSetExists(createFlashcardsInput.flashCardSetId);
+    this.validateFlashcardItems(createFlashcardsInput.flashcards);
+
+    const flashcards = await this.prismaService.$transaction(async (tx) => {
+      const createdFlashcards = await Promise.all(
+        createFlashcardsInput.flashcards.map((flashcard) =>
+          tx.flashcards.create({
+            data: {
+              answer: flashcard.answer,
+              question: flashcard.question,
+              flashcardSetId: createFlashcardsInput.flashCardSetId,
+            },
+            include: { flashcardSet: true },
+          }),
+        ),
+      );
 
       await tx.flashcardSets.update({
         where: {
-          id: flashcardsInput.flashCardSetId,
+          id: createFlashcardsInput.flashCardSetId,
         },
-
         data: {
           numberOfCards: {
-            increment: 1,
+            increment: createFlashcardsInput.flashcards.length,
           },
         },
       });
 
-      return createdFlashcard;
+      return createdFlashcards;
     });
 
     return flashcards;
@@ -205,5 +214,29 @@ export class FlashcardsService {
     });
 
     return flashcards;
+  }
+
+  private async ensureFlashcardSetExists(flashCardSetId: string) {
+    const flashExists = await this.prismaService.flashcardSets.findUnique({
+      where: {
+        id: flashCardSetId,
+      },
+    });
+
+    if (!flashExists) {
+      throw new NotFoundException('Flashcard set not found');
+    }
+  }
+
+  private validateFlashcardItems(flashcards: FlashcardItemInput[]) {
+    const hasInvalidFlashcard = flashcards.some(
+      (flashcard) => !flashcard.question || !flashcard.answer,
+    );
+
+    if (hasInvalidFlashcard) {
+      throw new NotFoundException(
+        'Each flashcard requires a question and answer',
+      );
+    }
   }
 }

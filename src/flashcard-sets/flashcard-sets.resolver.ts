@@ -29,6 +29,21 @@ export class FlashcardSetsResolver {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Mutation(() => FlashCardSets)
+  createFlashCardSetWithFlashcards(
+    @Args('createFlashCardSetWithFlashcardsInput')
+    flashcardSetsInput: FlashCardSetsInput,
+    @Context() context,
+  ) {
+    const userId = context.req.user.id;
+
+    return this.flashcardSetsService.createFlashcardSetWithFlashcards(
+      flashcardSetsInput,
+      userId,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Query(() => FlashCardSets, { name: 'flashCardSet' })
   viewFlashCardSet(
     @Args('viewFlashCardSetInput') flashcardSetsInput: FlashCardSetsInput,

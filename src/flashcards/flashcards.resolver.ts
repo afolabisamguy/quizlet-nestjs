@@ -7,6 +7,7 @@ import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 import { FlashCardInput } from './dto/flashcard.input';
+import { CreateFlashcardsInput } from './dto/create-flashcards.input';
 
 import { Flashcards } from './entities/flashcards.entities';
 
@@ -20,6 +21,14 @@ export class FlashcardsResolver {
     @Args('createFlashCardInput') flashcardsInput: FlashCardInput,
   ) {
     return this.flashcardsService.createFlashcard(flashcardsInput);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Mutation(() => [Flashcards])
+  createFlashCards(
+    @Args('createFlashCardsInput') createFlashcardsInput: CreateFlashcardsInput,
+  ) {
+    return this.flashcardsService.createFlashcards(createFlashcardsInput);
   }
 
   @UseGuards(JwtAuthGuard)

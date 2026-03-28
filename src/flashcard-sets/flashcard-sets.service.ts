@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 import { FlashCardSetsInput } from './dto/flashcard-sets.input';
+import { FlashcardItemInput } from 'src/flashcards/dto/flashcard-item.input';
 
 @Injectable()
 export class FlashcardSetsService {
@@ -36,6 +37,57 @@ export class FlashcardSetsService {
     });
 
     return flashcardSets;
+  }
+
+  async createFlashcardSetWithFlashcards(
+    flashcardSetsInput: FlashCardSetsInput,
+    userId: string,
+  ) {
+    const userExists = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!userExists) {
+      throw new NotFoundException('User not found');
+    }
+
+    this.validateFlashcardItems(flashcardSetsInput.flashcards);
+
+    const flashcardSet = await this.prismaService.$transaction(async (tx) => {
+      const createdFlashcardSet = await tx.flashcardSets.create({
+        data: {
+          subject: flashcardSetsInput.subject,
+          userId,
+          numberOfCards: flashcardSetsInput.flashcards!.length,
+        },
+      });
+
+      await Promise.all(
+        flashcardSetsInput.flashcards!.map((flashcard) =>
+          tx.flashcards.create({
+            data: {
+              question: flashcard.question,
+              answer: flashcard.answer,
+              flashcardSetId: createdFlashcardSet.id,
+            },
+          }),
+        ),
+      );
+
+      return tx.flashcardSets.findUnique({
+        where: {
+          id: createdFlashcardSet.id,
+        },
+        include: {
+          user: true,
+          flashcards: true,
+        },
+      });
+    });
+
+    return flashcardSet;
   }
 
   async viewFlashcardSet(subject: string, userId: string) {
@@ -174,5 +226,21 @@ export class FlashcardSetsService {
     });
 
     return flashcardsets;
+  }
+
+  private validateFlashcardItems(flashcards?: FlashcardItemInput[]) {
+    if (!flashcards?.length) {
+      throw new NotFoundException('At least one flashcard is required');
+    }
+
+    const hasInvalidFlashcard = flashcards.some(
+      (flashcard) => !flashcard.question || !flashcard.answer,
+    );
+
+    if (hasInvalidFlashcard) {
+      throw new NotFoundException(
+        'Each flashcard requires a question and answer',
+      );
+    }
   }
 }

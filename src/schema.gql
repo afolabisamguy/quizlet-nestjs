@@ -135,6 +135,12 @@ type Query {
 
 input FlashCardSetsInput {
   subject: String!
+  flashcards: [FlashcardItemInput!]
+}
+
+input FlashcardItemInput {
+  question: String!
+  answer: String!
 }
 
 input FlashCardInput {
@@ -148,9 +154,11 @@ type Mutation {
   signUp(signUpInput: SignUpInput!): SignUpResponse!
   login(loginInput: LoginInput!): LoginResponse!
   createFlashCardSet(createFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
+  createFlashCardSetWithFlashcards(createFlashCardSetWithFlashcardsInput: FlashCardSetsInput!): FlashCardSets!
   updateFlashcardSets(updateFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
   deleteFlashcardSets(deleteFlashCardSetInput: FlashCardSetsInput!): FlashCardSets!
   createFlashCard(createFlashCardInput: FlashCardInput!): Flashcards!
+  createFlashCards(createFlashCardsInput: CreateFlashcardsInput!): [Flashcards!]!
   updateFlashcards(updateFlashCardInput: FlashCardInput!): Flashcards!
   deleteFlashcards(deleteFlashCardInput: FlashCardInput!): Flashcards!
   createLobby(createLobbyInput: CreateLobbyInput!): Lobby!
@@ -170,6 +178,11 @@ input SignUpInput {
 input LoginInput {
   email: String!
   password: String!
+}
+
+input CreateFlashcardsInput {
+  flashCardSetId: String!
+  flashcards: [FlashcardItemInput!]!
 }
 
 input CreateLobbyInput {

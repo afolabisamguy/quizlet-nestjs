@@ -7,12 +7,12 @@ export class FlashCardInput {
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  question: string;
+  question?: string;
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  answer: string;
+  answer?: string;
 
   @Field()
   @IsString()

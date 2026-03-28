@@ -75,10 +75,13 @@ export class LobbyService {
         },
       });
 
-      await this.recalculateLeaderboard(tx, createdLobby.id, leaderboard.id);
-
       return this.getLobbyByCodeFromClient(tx, lobbyCode);
     });
+    await this.recalculateLeaderboard(
+      this.prisma,
+      lobby.id,
+      lobby.leaderboard.id,
+    );
 
     await this.publishLeaderboardUpdate(lobby.leaderboard);
 
@@ -612,23 +615,6 @@ export class LobbyService {
   }) {
     await lobbyPubSub.publish('leaderboard.updated', {
       leaderboardUpdated: leaderboard,
-    });
-  }
-
-  private async publishAnswerSubmitted(answerResult: {
-    lobbyCode: string;
-    lobbyStatus: string;
-    flashcardId: string;
-    question: string;
-    answer: string;
-    isCorrect: boolean;
-    scoreDelta: number;
-    standing: unknown;
-    leaderboard: unknown;
-    answeredAt: Date;
-  }) {
-    await lobbyPubSub.publish('answer.submitted', {
-      answerSubmitted: answerResult,
     });
   }
 }
