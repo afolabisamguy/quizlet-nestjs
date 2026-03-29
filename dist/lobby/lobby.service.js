@@ -11,9 +11,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LobbyService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
 const lobby_pubsub_1 = require("./lobby.pubsub");
 const lobby_code_util_1 = require("./lobby-code.util");
+const MAX_WRITE_CONFLICT_RETRIES = 3;
 let LobbyService = class LobbyService {
     prisma;
     constructor(prisma) {
@@ -109,7 +111,7 @@ let LobbyService = class LobbyService {
             throw new common_1.ConflictException('Cannot join a lobby that has already started');
         }
         const leaderboard = existingLobby.leaderboard;
-        const lobby = await this.prisma.$transaction(async (tx) => {
+        await this.withWriteConflictRetry(() => this.prisma.$transaction(async (tx) => {
             const nextParticipantIds = Array.from(new Set([...existingLobby.participantIds, userId]));
             if (nextParticipantIds.length !== existingLobby.participantIds.length) {
                 await tx.lobby.update({
@@ -145,14 +147,14 @@ let LobbyService = class LobbyService {
                     playerId: userId,
                 },
             });
-            await this.recalculateLeaderboard(tx, existingLobby.id, leaderboard.id);
-        });
+        }));
+        await this.recalculateLeaderboard(this.prisma, existingLobby.id, leaderboard.id);
         const lobbyist = await this.getLobbyByCodeFromClient(this.prisma, joinLobbyInput.lobbyCode);
         await this.publishLeaderboardUpdate(lobbyist.leaderboard);
         return lobbyist;
     }
     async updateLeaderboard(updateLeaderboardInput, userId) {
-        const leaderboard = await this.prisma.$transaction(async (tx) => {
+        const txResult = await this.withWriteConflictRetry(() => this.prisma.$transaction(async (tx) => {
             const lobby = await this.getLobbyRecordOrThrow(tx, updateLeaderboardInput.lobbyCode);
             const activeLeaderboard = lobby.leaderboard;
             if (!lobby.participantIds.includes(userId)) {
@@ -181,14 +183,19 @@ let LobbyService = class LobbyService {
                     streak: updateLeaderboardInput.streak ?? 0,
                 },
             });
-            await this.recalculateLeaderboard(tx, lobby.id, activeLeaderboard.id);
-            return this.getLeaderboardByCodeFromClient(tx, updateLeaderboardInput.lobbyCode);
-        });
+            return {
+                lobbyId: lobby.id,
+                leaderboardId: activeLeaderboard.id,
+                lobbyCode: updateLeaderboardInput.lobbyCode,
+            };
+        }));
+        await this.recalculateLeaderboard(this.prisma, txResult.lobbyId, txResult.leaderboardId);
+        const leaderboard = await this.getLeaderboardByCodeFromClient(this.prisma, txResult.lobbyCode);
         await this.publishLeaderboardUpdate(leaderboard);
         return leaderboard;
     }
     async submitAnswer(submitAnswerInput, userId) {
-        const txResult = await this.prisma.$transaction(async (tx) => {
+        const txResult = await this.withWriteConflictRetry(() => this.prisma.$transaction(async (tx) => {
             const lobby = await this.getLobbyRecordOrThrow(tx, submitAnswerInput.lobbyCode);
             if (lobby.lobbyStatus !== 'ACTIVE') {
                 throw new common_1.ConflictException('Lobby is not active');
@@ -238,11 +245,11 @@ let LobbyService = class LobbyService {
             return {
                 lobbyId: lobby.id,
                 leaderboardId: lobby.leaderboard.id,
-                lobbyCode: lobby.code,
+                lobbyCode: lobby.lobbyCode,
             };
-        });
+        }));
         await this.recalculateLeaderboard(this.prisma, txResult.lobbyId, txResult.leaderboardId);
-        const leaderboard = await this.getLeaderboardByCodeFromClient(this.prisma, submitAnswerInput.lobbyCode);
+        const leaderboard = await this.getLeaderboardByCodeFromClient(this.prisma, txResult.lobbyCode);
         const standing = leaderboard.entries.find((entry) => entry.player.id === userId);
         if (!standing) {
             throw new common_1.NotFoundException('Leaderboard entry not found');
@@ -426,6 +433,29 @@ let LobbyService = class LobbyService {
         await lobby_pubsub_1.lobbyPubSub.publish('leaderboard.updated', {
             leaderboardUpdated: leaderboard,
         });
+    }
+    async withWriteConflictRetry(operation) {
+        let attempt = 0;
+        while (true) {
+            try {
+                return await operation();
+            }
+            catch (error) {
+                attempt += 1;
+                if (!this.isWriteConflictError(error) ||
+                    attempt >= MAX_WRITE_CONFLICT_RETRIES) {
+                    throw error;
+                }
+                await this.delay(25 * attempt);
+            }
+        }
+    }
+    isWriteConflictError(error) {
+        return (error instanceof client_1.Prisma.PrismaClientKnownRequestError &&
+            error.code === 'P2034');
+    }
+    async delay(ms) {
+        await new Promise((resolve) => setTimeout(resolve, ms));
     }
 };
 exports.LobbyService = LobbyService;

@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -17,6 +18,7 @@ import { lobbyPubSub } from './lobby.pubsub';
 import { generateLobbyCode } from './lobby-code.util';
 
 type PrismaLobbyClient = any;
+const MAX_WRITE_CONFLICT_RETRIES = 3;
 
 @Injectable()
 export class LobbyService {
@@ -151,61 +153,67 @@ export class LobbyService {
       );
     }
     const leaderboard = existingLobby.leaderboard;
-    const lobby = await this.prisma.$transaction(async (tx) => {
-      const nextParticipantIds = Array.from(
-        new Set([...existingLobby.participantIds, userId]),
-      );
+    await this.withWriteConflictRetry(() =>
+      this.prisma.$transaction(async (tx) => {
+        const nextParticipantIds = Array.from(
+          new Set([...existingLobby.participantIds, userId]),
+        );
 
-      if (nextParticipantIds.length !== existingLobby.participantIds.length) {
-        await tx.lobby.update({
-          where: { id: existingLobby.id },
+        if (nextParticipantIds.length !== existingLobby.participantIds.length) {
+          await tx.lobby.update({
+            where: { id: existingLobby.id },
 
-          data: {
-            participantIds: {
-              set: [...new Set([...existingLobby.participantIds, userId])],
+            data: {
+              participantIds: {
+                set: [...new Set([...existingLobby.participantIds, userId])],
+              },
+            },
+          });
+
+          const user = await tx.user.findUnique({
+            where: { id: userId },
+
+            select: { lobbyIds: true },
+          });
+
+          await tx.user.update({
+            where: { id: userId },
+
+            data: {
+              lobbyIds: Array.from(
+                new Set([...(user?.lobbyIds ?? []), existingLobby.id]),
+              ),
+            },
+          });
+        }
+
+        await tx.leaderboardEntry.upsert({
+          where: {
+            leaderboardId_playerId: {
+              leaderboardId: leaderboard.id,
+
+              playerId: userId,
             },
           },
-        });
 
-        const user = await tx.user.findUnique({
-          where: { id: userId },
+          update: {},
 
-          select: { lobbyIds: true },
-        });
-
-        await tx.user.update({
-          where: { id: userId },
-
-          data: {
-            lobbyIds: Array.from(
-              new Set([...(user?.lobbyIds ?? []), existingLobby.id]),
-            ),
-          },
-        });
-      }
-
-      await tx.leaderboardEntry.upsert({
-        where: {
-          leaderboardId_playerId: {
+          create: {
             leaderboardId: leaderboard.id,
+
+            lobbyId: existingLobby.id,
 
             playerId: userId,
           },
-        },
+        });
+      }),
+    );
 
-        update: {},
-
-        create: {
-          leaderboardId: leaderboard.id,
-
-          lobbyId: existingLobby.id,
-
-          playerId: userId,
-        },
-      });
-
-      await this.recalculateLeaderboard(tx, existingLobby.id, leaderboard.id);
-    });
+    await this.recalculateLeaderboard(
+      this.prisma,
+      existingLobby.id,
+      leaderboard.id,
+    );
 
     const lobbyist = await this.getLobbyByCodeFromClient(
       this.prisma,
@@ -220,137 +228,151 @@ export class LobbyService {
 
     userId: string,
   ) {
-    const leaderboard = await this.prisma.$transaction(async (tx) => {
-      const lobby = await this.getLobbyRecordOrThrow(
-        tx,
-        updateLeaderboardInput.lobbyCode,
-      );
+    const txResult = await this.withWriteConflictRetry(() =>
+      this.prisma.$transaction(async (tx) => {
+        const lobby = await this.getLobbyRecordOrThrow(
+          tx,
+          updateLeaderboardInput.lobbyCode,
+        );
 
-      const activeLeaderboard = lobby.leaderboard;
+        const activeLeaderboard = lobby.leaderboard;
 
-      if (!lobby.participantIds.includes(userId)) {
-        throw new ConflictException('Player is not part of this lobby');
-      }
+        if (!lobby.participantIds.includes(userId)) {
+          throw new ConflictException('Player is not part of this lobby');
+        }
 
-      await tx.leaderboardEntry.upsert({
-        where: {
-          leaderboardId_playerId: {
+        await tx.leaderboardEntry.upsert({
+          where: {
+            leaderboardId_playerId: {
+              leaderboardId: activeLeaderboard.id,
+
+              playerId: userId,
+            },
+          },
+
+          update: {
+            score: updateLeaderboardInput.score,
+
+            correctAnswers: updateLeaderboardInput.correctAnswers ?? 0,
+
+            incorrectAnswers: updateLeaderboardInput.incorrectAnswers ?? 0,
+
+            streak: updateLeaderboardInput.streak ?? 0,
+          },
+
+          create: {
             leaderboardId: activeLeaderboard.id,
 
+            lobbyId: lobby.id,
+
             playerId: userId,
+
+            score: updateLeaderboardInput.score,
+
+            correctAnswers: updateLeaderboardInput.correctAnswers ?? 0,
+
+            incorrectAnswers: updateLeaderboardInput.incorrectAnswers ?? 0,
+
+            streak: updateLeaderboardInput.streak ?? 0,
           },
-        },
+        });
 
-        update: {
-          score: updateLeaderboardInput.score,
-
-          correctAnswers: updateLeaderboardInput.correctAnswers ?? 0,
-
-          incorrectAnswers: updateLeaderboardInput.incorrectAnswers ?? 0,
-
-          streak: updateLeaderboardInput.streak ?? 0,
-        },
-
-        create: {
-          leaderboardId: activeLeaderboard.id,
-
+        return {
           lobbyId: lobby.id,
+          leaderboardId: activeLeaderboard.id,
+          lobbyCode: updateLeaderboardInput.lobbyCode,
+        };
+      }),
+    );
 
-          playerId: userId,
+    await this.recalculateLeaderboard(
+      this.prisma,
+      txResult.lobbyId,
+      txResult.leaderboardId,
+    );
 
-          score: updateLeaderboardInput.score,
-
-          correctAnswers: updateLeaderboardInput.correctAnswers ?? 0,
-
-          incorrectAnswers: updateLeaderboardInput.incorrectAnswers ?? 0,
-
-          streak: updateLeaderboardInput.streak ?? 0,
-        },
-      });
-
-      await this.recalculateLeaderboard(tx, lobby.id, activeLeaderboard.id);
-
-      return this.getLeaderboardByCodeFromClient(
-        tx,
-        updateLeaderboardInput.lobbyCode,
-      );
-    });
+    const leaderboard = await this.getLeaderboardByCodeFromClient(
+      this.prisma,
+      txResult.lobbyCode,
+    );
 
     await this.publishLeaderboardUpdate(leaderboard);
 
     return leaderboard;
   }
   async submitAnswer(submitAnswerInput: SubmitAnswerInput, userId: string) {
-    const txResult = await this.prisma.$transaction(async (tx) => {
-      const lobby = await this.getLobbyRecordOrThrow(
-        tx,
-        submitAnswerInput.lobbyCode,
-      );
+    const txResult = await this.withWriteConflictRetry(() =>
+      this.prisma.$transaction(async (tx) => {
+        const lobby = await this.getLobbyRecordOrThrow(
+          tx,
+          submitAnswerInput.lobbyCode,
+        );
 
-      if (lobby.lobbyStatus !== 'ACTIVE') {
-        throw new ConflictException('Lobby is not active');
-      }
+        if (lobby.lobbyStatus !== 'ACTIVE') {
+          throw new ConflictException('Lobby is not active');
+        }
 
-      if (!lobby.participantIds.includes(userId)) {
-        throw new ConflictException('Player is not part of this lobby');
-      }
+        if (!lobby.participantIds.includes(userId)) {
+          throw new ConflictException('Player is not part of this lobby');
+        }
 
-      const existingEntry = await tx.leaderboardEntry.findUnique({
-        where: {
-          leaderboardId_playerId: {
-            leaderboardId: lobby.leaderboard.id,
-            playerId: userId,
+        const existingEntry = await tx.leaderboardEntry.findUnique({
+          where: {
+            leaderboardId_playerId: {
+              leaderboardId: lobby.leaderboard.id,
+              playerId: userId,
+            },
           },
-        },
-      });
+        });
 
-      const nextScore = Math.max(
-        0,
-        (existingEntry?.score ?? 0) + submitAnswerInput.scoreDelta,
-      );
+        const nextScore = Math.max(
+          0,
+          (existingEntry?.score ?? 0) + submitAnswerInput.scoreDelta,
+        );
 
-      const nextCorrectAnswers =
-        (existingEntry?.correctAnswers ?? 0) +
-        (submitAnswerInput.isCorrect ? 1 : 0);
+        const nextCorrectAnswers =
+          (existingEntry?.correctAnswers ?? 0) +
+          (submitAnswerInput.isCorrect ? 1 : 0);
 
-      const nextIncorrectAnswers =
-        (existingEntry?.incorrectAnswers ?? 0) +
-        (submitAnswerInput.isCorrect ? 0 : 1);
+        const nextIncorrectAnswers =
+          (existingEntry?.incorrectAnswers ?? 0) +
+          (submitAnswerInput.isCorrect ? 0 : 1);
 
-      const nextStreak = submitAnswerInput.isCorrect
-        ? (existingEntry?.streak ?? 0) + 1
-        : 0;
+        const nextStreak = submitAnswerInput.isCorrect
+          ? (existingEntry?.streak ?? 0) + 1
+          : 0;
 
-      await tx.leaderboardEntry.upsert({
-        where: {
-          leaderboardId_playerId: {
-            leaderboardId: lobby.leaderboard.id,
-            playerId: userId,
+        await tx.leaderboardEntry.upsert({
+          where: {
+            leaderboardId_playerId: {
+              leaderboardId: lobby.leaderboard.id,
+              playerId: userId,
+            },
           },
-        },
-        update: {
-          score: nextScore,
-          correctAnswers: nextCorrectAnswers,
-          incorrectAnswers: nextIncorrectAnswers,
-          streak: nextStreak,
-        },
-        create: {
-          leaderboardId: lobby.leaderboard.id,
+          update: {
+            score: nextScore,
+            correctAnswers: nextCorrectAnswers,
+            incorrectAnswers: nextIncorrectAnswers,
+            streak: nextStreak,
+          },
+          create: {
+            leaderboardId: lobby.leaderboard.id,
+            lobbyId: lobby.id,
+            playerId: userId,
+            score: nextScore,
+            correctAnswers: nextCorrectAnswers,
+            incorrectAnswers: nextIncorrectAnswers,
+            streak: nextStreak,
+          },
+        });
+
+        return {
           lobbyId: lobby.id,
-          playerId: userId,
-          score: nextScore,
-          correctAnswers: nextCorrectAnswers,
-          incorrectAnswers: nextIncorrectAnswers,
-          streak: nextStreak,
-        },
-      });
-
-      return {
-        lobbyId: lobby.id,
-        leaderboardId: lobby.leaderboard.id,
-        lobbyCode: lobby.code,
-      };
-    });
+          leaderboardId: lobby.leaderboard.id,
+          lobbyCode: lobby.lobbyCode,
+        };
+      }),
+    );
 
     await this.recalculateLeaderboard(
       this.prisma,
@@ -361,7 +383,7 @@ export class LobbyService {
     // 🔥 OUTSIDE TRANSACTION (no locking, faster)
     const leaderboard = await this.getLeaderboardByCodeFromClient(
       this.prisma,
-      submitAnswerInput.lobbyCode,
+      txResult.lobbyCode,
     );
 
     const standing = leaderboard.entries.find(
@@ -639,5 +661,37 @@ export class LobbyService {
     await lobbyPubSub.publish('leaderboard.updated', {
       leaderboardUpdated: leaderboard,
     });
+  }
+
+  private async withWriteConflictRetry<T>(operation: () => Promise<T>) {
+    let attempt = 0;
+
+    while (true) {
+      try {
+        return await operation();
+      } catch (error) {
+        attempt += 1;
+
+        if (
+          !this.isWriteConflictError(error) ||
+          attempt >= MAX_WRITE_CONFLICT_RETRIES
+        ) {
+          throw error;
+        }
+
+        await this.delay(25 * attempt);
+      }
+    }
+  }
+
+  private isWriteConflictError(error: unknown) {
+    return (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2034'
+    );
+  }
+
+  private async delay(ms: number) {
+    await new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

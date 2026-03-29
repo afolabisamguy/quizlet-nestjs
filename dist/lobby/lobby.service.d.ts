@@ -45,4 +45,7 @@ export declare class LobbyService {
     private getLobbyByCodeFromClient;
     private getLeaderboardByCodeFromClient;
     private publishLeaderboardUpdate;
+    private withWriteConflictRetry;
+    private isWriteConflictError;
+    private delay;
 }
